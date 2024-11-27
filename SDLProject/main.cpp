@@ -164,11 +164,26 @@ void process_input()
 
                     case SDLK_SPACE:
                         // Jump if a player exists and is on the ground
-                        if (g_current_scene->get_state().player &&
+                        if (g_app_status == RUNNING &&
+                            g_current_scene->get_state().player &&
                             g_current_scene->get_state().player->get_collided_bottom())
                         {
                             g_current_scene->get_state().player->jump();
                             Mix_PlayChannel(-1, g_current_scene->get_state().jump_sfx, 0);
+                        }
+                        break;
+
+                    case SDLK_p:
+                        if (g_app_status == RUNNING)
+                        {
+                            g_app_status = PAUSED;
+                        }
+                        break;
+
+                    case SDLK_RETURN: // Enter key
+                        if (g_app_status == PAUSED)
+                        {
+                            g_app_status = RUNNING;
                         }
                         break;
 
@@ -180,6 +195,8 @@ void process_input()
                 break;
         }
     }
+
+    if (g_app_status != RUNNING) return;
 
     // Handle player movement only if `player` exists
     if (g_current_scene->get_state().player)
@@ -202,6 +219,7 @@ void process_input()
         g_current_scene->get_state().enemies->set_movement(glm::vec3(0.0f));
     }
 }
+
 
 void update()
 {
@@ -404,26 +422,27 @@ void update()
 void render()
 {
     g_shader_program.set_view_matrix(g_view_matrix);
-    glClear(GL_COLOR_BUFFER_BIT);
+   glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(g_shader_program.get_program_id());
-    g_current_scene->render(&g_shader_program);
+   glUseProgram(g_shader_program.get_program_id());
+   g_current_scene->render(&g_shader_program);
 
-    // Render player-specific information only if the player exists
-    if (g_current_scene->get_state().player)
-    {
-        glm::mat4 ui_view_matrix = glm::mat4(1.0f);
-        g_shader_program.set_view_matrix(ui_view_matrix);
-        
-        std::string livesText = "LIVES: " + std::to_string(curr_lives);
+   // Render player-specific information only if the player exists
+   if (g_current_scene->get_state().player)
+   {
+       glm::mat4 ui_view_matrix = glm::mat4(1.0f);
+       g_shader_program.set_view_matrix(ui_view_matrix);
+       
+       std::string livesText = "LIVES: " + std::to_string(curr_lives);
 
-        glm::vec3 message_position = glm::vec3(-4.5f, 3.1f, 0.0f);
+       glm::vec3 message_position = glm::vec3(-4.5f, 3.1f, 0.0f);
 
-        Utility::draw_text(&g_shader_program, Utility::load_texture("assets/font1.png"), livesText, .4f, 0.05f, message_position);
-        
-        g_shader_program.set_view_matrix(g_view_matrix);
-    }
+       Utility::draw_text(&g_shader_program, Utility::load_texture("assets/font1.png"), livesText, .4f, 0.05f, message_position);
+       
+       g_shader_program.set_view_matrix(g_view_matrix);
+   }
 
+    // Pause screen rendering
     if (g_app_status == PAUSED)
     {
         glm::vec3 message_position;
@@ -435,14 +454,14 @@ void render()
         }
         else
         {
-            message_position = glm::vec3(-1.5f, 1.0f, 0.0f); //player does not exist so defualt pos
+            message_position = glm::vec3(-1.5f, 1.0f, 0.0f); // Default position if player doesn't exist
         }
 
         if (curr_lives == 0)
         {
+            // Render "You Lose" text
             glm::mat4 ui_view_matrix = glm::mat4(1.0f);
             g_shader_program.set_view_matrix(ui_view_matrix);
-            // Display "You Lose" text
             Utility::draw_text(
                 &g_shader_program,
                 Utility::load_texture("assets/font1.png"),
@@ -451,6 +470,24 @@ void render()
                 0.00f,   // Spacing
                 message_position
             );
+            g_shader_program.set_view_matrix(g_view_matrix);
+        }
+        else
+        {
+            // Render "Press Enter to resume" text
+            glm::mat4 ui_view_matrix = glm::mat4(1.0f);
+            g_shader_program.set_view_matrix(ui_view_matrix);
+
+            glm::vec3 pause_message_position = glm::vec3(-3.5f, 0.0f, 0.0f);
+            Utility::draw_text(
+                &g_shader_program,
+                Utility::load_texture("assets/font1.png"),
+                "Press Enter to resume",
+                0.5f,    // Font size
+                0.1f,    // Spacing
+                pause_message_position
+            );
+
             g_shader_program.set_view_matrix(g_view_matrix);
         }
     }

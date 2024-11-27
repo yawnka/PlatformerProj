@@ -37,6 +37,9 @@ void MainMenu::render(ShaderProgram *program) {
     glm::vec3 prompt_position = glm::vec3(1.0f, -2.0f, 0.0f);
     Utility::draw_text(program, Utility::load_texture("assets/font1.png"), "Press Enter to Start:", 0.4f, 0.02f, prompt_position);
     
+    glm::vec3 pause_position = glm::vec3(1.0f, -3.0f, 0.0f);
+    Utility::draw_text(program, Utility::load_texture("assets/font1.png"), "Press P to Pause:", 0.3f, 0.02f, pause_position);
+    
     Utility::draw_text(program, Utility::load_texture("assets/font1.png"), "Note: When you die and respawn", 0.3f, 0.02f, glm::vec3(0.5f, -4.0f, 0.0f));
     Utility::draw_text(program, Utility::load_texture("assets/font1.png"), ",click the move right button", 0.3f, 0.02f, glm::vec3(0.5f, -5.0f, 0.0f));
     Utility::draw_text(program, Utility::load_texture("assets/font1.png"), "& you should drop down!", 0.3f, 0.02f, glm::vec3(0.5f, -6.0f, 0.0f));
